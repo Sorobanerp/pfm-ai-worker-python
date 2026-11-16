@@ -1,0 +1,1 @@
+"""Kafka Outbound Producer Adapter."""
