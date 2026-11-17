@@ -1,4 +1,4 @@
-"""Official 2-Level Financial Taxonomy (Artifact 01 V2)."""
+"""Official 2-Level Financial Taxonomy (Artifact 01 V2) & Core Ledger Canonical Mapper."""
 
 from enum import StrEnum
 
@@ -91,7 +91,45 @@ CATEGORY_GROUP_MAP: dict[CategoryCode, CategoryGroup] = {
     CategoryCode.SYS_CARD_BILL_PAYMENT: CategoryGroup.SYSTEM_CONTROL,
 }
 
+# Maps Worker CategoryCode to Core Ledger Flyway V1 seed `(level1_code, level2_code)`
+CORE_LEDGER_TAXONOMY_MAP: dict[CategoryCode, tuple[str, str]] = {
+    CategoryCode.FIX_HOUSING: ("MORADIA", "ALUGUEL_CONDOMINIO"),
+    CategoryCode.FIX_UTILITIES: ("MORADIA", "ENERGIA_ELETRICA"),
+    CategoryCode.FIX_COMMUNICATION: ("MORADIA", "INTERNET_TV_TELEFONIA"),
+    CategoryCode.FIX_HEALTH_PLAN: ("SAUDE", "PLANO_SAUDE"),
+    CategoryCode.FIX_EDUCATION: ("EDUCACAO", "MENSALIDADE_ESCOLAR_FACULDADE"),
+    CategoryCode.FIX_INSURANCE: ("FINANCEIRO", "SEGURO_VIDA_PATRIMONIAL"),
+    CategoryCode.VAR_FOOD_GROCERY: ("ALIMENTACAO", "SUPERMERCADO_MERCEARIA"),
+    CategoryCode.VAR_FOOD_RESTAURANT: ("ALIMENTACAO", "RESTAURANTES_GASTRONOMIA"),
+    CategoryCode.VAR_FOOD_DELIVERY: ("ALIMENTACAO", "DELIVERY_APLICATIVOS"),
+    CategoryCode.VAR_MOBILITY_FUEL: ("TRANSPORTE", "COMBUSTIVEL_ETANOL_GASOLINA"),
+    CategoryCode.VAR_MOBILITY_APP: ("TRANSPORTE", "APLICATIVOS_MOBILIDADE"),
+    CategoryCode.VAR_FAMILY_CARE: ("SAUDE", "FARMACIA_MEDICAMENTOS"),
+    CategoryCode.VAR_SHOPPING_RETAIL: ("LAZER", "VESTUARIO_CALCADOS"),
+    CategoryCode.VAR_SUBSCRIPTIONS: ("LAZER", "STREAMING_ASSINATURAS_DIGITAIS"),
+    CategoryCode.VAR_LEISURE_TRAVEL: ("LAZER", "VIAGENS_HOSPEDAGEM"),
+    CategoryCode.VAR_PET_CARE: ("LAZER", "PETS_VETERINARIO"),
+    CategoryCode.DEBT_CARD_INSTALLMENT: ("FINANCEIRO", "ANUIDADE_TARIFAS_BANCARIAS"),
+    CategoryCode.DEBT_BANK_FEE: ("FINANCEIRO", "ANUIDADE_TARIFAS_BANCARIAS"),
+    CategoryCode.DEBT_INTEREST_IOF: ("FINANCEIRO", "IOF_IMPOSTOS_FINANCEIROS"),
+    CategoryCode.DEBT_LOAN_FINANCING: ("MORADIA", "FINANCIAMENTO_IMOBILIARIO"),
+    CategoryCode.INV_FIXED_INCOME: ("PATRIMONIO", "APORTE_RENDA_FIXA"),
+    CategoryCode.INV_EQUITIES: ("PATRIMONIO", "APORTE_RENDA_VARIAVEL"),
+    CategoryCode.INV_EMERGENCY_FUND: ("PATRIMONIO", "RESERVA_EMERGENCIA"),
+    CategoryCode.INC_SALARY: ("RECEITAS", "SALARIO_PRO_LABORE"),
+    CategoryCode.INC_REFUND_CASHBACK: ("RECEITAS", "ESTORNO_CREDITO"),
+    CategoryCode.INC_EXTRA_INCOME: ("RECEITAS", "FREELANCE_PRESTACAO_SERVICOS"),
+    CategoryCode.SYS_UNCLASSIFIED: ("OUTROS", "NAO_CATEGORIZADO"),
+    CategoryCode.SYS_INTERNAL_TRANSFER: ("PATRIMONIO", "TRANSFERENCIA_MESMA_TITULARIDADE"),
+    CategoryCode.SYS_CARD_BILL_PAYMENT: ("PATRIMONIO", "PAGAMENTO_FATURA_CARTAO"),
+}
+
 
 def get_category_group(code: CategoryCode) -> CategoryGroup:
     """Resolve Level 1 CategoryGroup from a Level 2 CategoryCode."""
     return CATEGORY_GROUP_MAP.get(code, CategoryGroup.SYSTEM_CONTROL)
+
+
+def to_core_ledger_taxonomy(code: CategoryCode) -> tuple[str, str]:
+    """Convert Worker CategoryCode to Core Ledger Java `(level1_code, level2_code)` FK tuple."""
+    return CORE_LEDGER_TAXONOMY_MAP.get(code, ("OUTROS", "NAO_CATEGORIZADO"))

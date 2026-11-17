@@ -18,7 +18,7 @@ from src.domain.models import (
     RawTransaction,
 )
 from src.domain.normalizer import MerchantNormalizer
-from src.domain.taxonomy import CategoryCode, CategoryGroup
+from src.domain.taxonomy import CategoryCode, CategoryGroup, to_core_ledger_taxonomy
 
 
 class InMemoryTenantRuleRepository:
@@ -159,6 +159,12 @@ def test_layer2_corrects_churrascaria_gaucha_from_supermercado_to_restaurant() -
     assert categorized.acquirer_prefix == "MP *"
     assert categorized.category_code == CategoryCode.VAR_FOOD_RESTAURANT
     assert categorized.category_group == CategoryGroup.VARIABLE_LIFESTYLE
+    assert categorized.ledger_category_code == "ALIMENTACAO"
+    assert categorized.ledger_subcategory_code == "RESTAURANTES_GASTRONOMIA"
+    assert to_core_ledger_taxonomy(CategoryCode.VAR_MOBILITY_FUEL) == (
+        "TRANSPORTE",
+        "COMBUSTIVEL_ETANOL_GASOLINA",
+    )
     assert categorized.categorization_source == CategorizationSource.LAYER_2_DETERMINISTIC_REGEX
     assert categorized.requires_inbox_review is False
     # Layer 2 solved with confidence >= 0.85, so Gemini Layer 3 must NOT be called

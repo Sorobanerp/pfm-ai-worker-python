@@ -1,12 +1,17 @@
-"""Immutable Domain Models for the 3-Layer Categorization Pipeline."""
+"""Immutable Domain Models for the 3-Layer Categorization Pipeline (Zero float for monetary values)."""
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import StrEnum
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.domain.taxonomy import CategoryCode, CategoryGroup
+from src.domain.taxonomy import (
+    CategoryCode,
+    CategoryGroup,
+    to_core_ledger_taxonomy,
+)
 
 
 class CategorizationSource(StrEnum):
@@ -72,10 +77,28 @@ class CategorizedTransaction(BaseModel):
     installment_total: int
     category_group: CategoryGroup
     category_code: CategoryCode
+    ledger_category_code: str = Field(default="OUTROS")
+    ledger_subcategory_code: str = Field(default="NAO_CATEGORIZADO")
     confidence: float = Field(..., ge=0.0, le=1.0)
     categorization_source: CategorizationSource
     requires_inbox_review: bool = False
     processed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+    @model_validator(mode="before")
+    @classmethod
+    def _populate_ledger_taxonomy(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            raw_code = data.get("category_code")
+            if raw_code is not None:
+                code_enum = (
+                    raw_code
+                    if isinstance(raw_code, CategoryCode)
+                    else CategoryCode(str(raw_code))
+                )
+                l1, l2 = to_core_ledger_taxonomy(code_enum)
+                data.setdefault("ledger_category_code", l1)
+                data.setdefault("ledger_subcategory_code", l2)
+        return data
 
 
 class LearnedRule(BaseModel):

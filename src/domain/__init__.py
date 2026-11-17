@@ -10,13 +10,16 @@ from src.domain.models import (
 from src.domain.normalizer import MerchantNormalizer
 from src.domain.taxonomy import (
     CATEGORY_GROUP_MAP,
+    CORE_LEDGER_TAXONOMY_MAP,
     CategoryCode,
     CategoryGroup,
     get_category_group,
+    to_core_ledger_taxonomy,
 )
 
 __all__ = [
     "CATEGORY_GROUP_MAP",
+    "CORE_LEDGER_TAXONOMY_MAP",
     "CategorizationSource",
     "CategorizedTransaction",
     "CategoryCode",
@@ -26,4 +29,5 @@ __all__ = [
     "NormalizationResult",
     "RawTransaction",
     "get_category_group",
+    "to_core_ledger_taxonomy",
 ]
