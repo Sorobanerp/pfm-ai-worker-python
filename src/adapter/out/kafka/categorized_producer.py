@@ -12,7 +12,7 @@ class KafkaCategorizedEventProducer:
 
     def __init__(
         self,
-        bootstrap_servers: str = "localhost:9092",
+        bootstrap_servers: str = "localhost:19092",
         topic: str = TX_CATEGORIZED_TOPIC,
     ) -> None:
         self._topic = topic

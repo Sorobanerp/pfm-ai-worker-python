@@ -7,7 +7,7 @@ from src.domain.models import LearnedRule
 from src.domain.taxonomy import CategoryCode, CategoryGroup
 
 DEFAULT_AI_RULES_DSN = (
-    "postgresql://pfm_ai_user:pfm_ai_pass@localhost:5433/pfm_ai_rules"
+    "postgresql://pfm_ai_user:pfm_ai_pass@localhost:15433/pfm_ai_rules"
 )
 
 
