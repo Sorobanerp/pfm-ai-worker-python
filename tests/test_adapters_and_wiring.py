@@ -8,6 +8,7 @@ from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from src.adapter.out.gemini.gemini_classifier import GeminiStructuredClassifierAdapter
 from src.adapter.out.kafka.categorized_producer import KafkaCategorizedEventProducer
 from src.adapter.out.postgres.tenant_rule_repository import (
@@ -99,7 +100,7 @@ def test_kafka_categorized_producer() -> None:
 
         producer = KafkaCategorizedEventProducer(bootstrap_servers="localhost:9092")
         tx = CategorizedTransaction(
-            idempotency_key="idemp-12345678",
+            idempotency_key="idemp-12345678",  # gitleaks:allow
             tenant_id="tenant-1",
             statement_id="stmt-1",
             card_last4="1234",
@@ -184,7 +185,7 @@ def test_statement_consumer_single_and_batch() -> None:
         single_payload = json.dumps({
             "tenant_id": "tenant-1",
             "statement_id": "stmt-1",
-            "idempotency_key": "idemp-12345678",
+            "idempotency_key": "idemp-12345678",  # gitleaks:allow
             "card_last_four": "1234",
             "transaction_date": "2026-04-10",
             "competence_date": "2026-04-10",
