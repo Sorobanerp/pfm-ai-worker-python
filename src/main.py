@@ -13,6 +13,7 @@ from src.adapter.out.postgres.tenant_rule_repository import (
 from src.application.pipeline_service import ThreeLayerCategorizationService
 from src.config import load_config
 from src.health import start_health_server
+from src.observability import init_otel_config
 
 _kafka_in_mod = importlib.import_module("src.adapter.in.kafka.statement_consumer")
 StatementRawExtractedConsumer = _kafka_in_mod.StatementRawExtractedConsumer
@@ -22,6 +23,7 @@ logger = logging.getLogger("pfm-ai-worker")
 
 
 def main() -> None:
+    init_otel_config()
     cfg = load_config()
     bootstrap_servers = cfg.kafka_bootstrap_servers
     group_id = cfg.kafka_group_id

@@ -26,6 +26,13 @@ from src.domain.models import (
 )
 from src.domain.taxonomy import CategoryCode, CategoryGroup
 from src.health import start_health_server
+from src.observability import (
+    DEFAULT_OTLP_ENDPOINT,
+    ensure_traceparent,
+    format_structured_json_log,
+    init_otel_config,
+    mask_sensitive_pii,
+)
 
 _kafka_in_mod = importlib.import_module("src.adapter.in.kafka.statement_consumer")
 StatementRawExtractedConsumer = _kafka_in_mod.StatementRawExtractedConsumer
@@ -346,3 +353,35 @@ def test_main_graceful_shutdown() -> None:
 
         assert mock_consumer.close.called
         assert mock_producer.flush.called
+
+
+def test_observability_and_lgpd_sanitizer(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+    monkeypatch.delenv("OTEL_SERVICE_NAME", raising=False)
+    cfg = init_otel_config()
+    assert cfg.noop is True
+    assert cfg.endpoint == DEFAULT_OTLP_ENDPOINT
+    assert cfg.service_name == "pfm-ai-worker-python"
+
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", DEFAULT_OTLP_ENDPOINT)
+    monkeypatch.setenv("OTEL_SERVICE_NAME", "custom-ai")
+    cfg_live = init_otel_config()
+    assert cfg_live.noop is False
+    assert cfg_live.service_name == "custom-ai"
+
+    valid_tp = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+    assert ensure_traceparent(valid_tp) == valid_tp
+    gen_tp = ensure_traceparent("invalid")
+    assert len(gen_tp) == 55 and gen_tp.startswith("00-")
+
+    assert mask_sensitive_pii("") == ""
+    masked = mask_sensitive_pii('CPF 123.456.789-01 cartao 4532 1122 3344 5566 "pdfPassword":"abc"')
+    assert "123.456.789-01" not in masked
+    assert "4532 1122" not in masked
+    assert "abc" not in masked
+
+    log_json = format_structured_json_log("", "CPF 11122233344 password=xyz", valid_tp)
+    assert "[CPF_MASKED]" in log_json
+    assert "[REDACTED]" in log_json
+    assert "4bf92f3577b34da6a3ce929d0e0e4736" in log_json
+
