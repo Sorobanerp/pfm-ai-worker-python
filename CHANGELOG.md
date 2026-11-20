@@ -7,6 +7,8 @@ Todas as alterações notáveis neste repositório são documentadas neste arqui
 ## [Unreleased]
 
 ### Added
+- Entrypoint Serverless **AWS Lambda Arm64** (`src/adapter/in/lambda_handler.py`) conforme **ADR-009**: custo \$0 ocioso, sem conexão direta ao PostgreSQL (`InMemoryZeroDbRuleRepository`), compatível com eventos Kafka/Upstash, SQS e invocação direta, devolvendo eventos para `tx.categorized`.
+- Entrypoint contínuo **Kubernetes/KEDA** (`src/adapter/in/kafka_worker.py`) com `KafkaWorkerRunner` e *graceful shutdown* (`SIGTERM`/`SIGINT`).
 - Padronização de governança DevEx (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`) e workflow de validação de **Conventional Commits** em Pull Requests para `develop` e `main`.
 
 ---
