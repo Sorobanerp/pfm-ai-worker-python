@@ -3,7 +3,6 @@
 import base64
 import importlib
 import json
-import sys
 from unittest.mock import MagicMock
 
 import pytest

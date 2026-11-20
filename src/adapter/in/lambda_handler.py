@@ -80,7 +80,7 @@ def _decode_record_payload(raw_value: Any) -> dict[str, Any]:
         try:
             decoded = base64.b64decode(raw_value, validate=True).decode("utf-8")
             return json.loads(decoded)
-        except Exception:
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
             return json.loads(raw_value)
     raise ValueError(f"Unsupported event payload type: {type(raw_value).__name__}")
 

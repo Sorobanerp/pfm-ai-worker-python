@@ -7,11 +7,12 @@ import os
 import signal
 from typing import Any
 
+from src.application.pipeline_service import ThreeLayerCategorizationService
+
 from .kafka.statement_consumer import (
     RAW_EXTRACTED_TOPIC,
     StatementRawExtractedConsumer,
 )
-from src.application.pipeline_service import ThreeLayerCategorizationService
 
 logger = logging.getLogger(__name__)
 

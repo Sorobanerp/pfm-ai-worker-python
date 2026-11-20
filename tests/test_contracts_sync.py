@@ -1,5 +1,4 @@
 """Tests contract synchronization and gRPC protobuf integrity."""
-import pytest
 from src.contracts.pfm.v1 import tenant_admin_service_pb2, user_profile_service_pb2
 
 

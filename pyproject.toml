@@ -35,3 +35,6 @@ addopts = "-v --tb=short"
 
 [tool.coverage.run]
 omit = ["src/contracts/*"]
+
+[tool.ruff]
+exclude = ["src/contracts/**"]
