@@ -8,7 +8,7 @@ import re
 import secrets
 from dataclasses import dataclass
 
-DEFAULT_OTLP_ENDPOINT = "http://datadog-agent.monitoring.svc.cluster.local:4318"
+DEFAULT_OTLP_ENDPOINT = "https://otel-collector.pfm.internal:4318"
 DEFAULT_SERVICE_NAME = "pfm-ai-worker-python"
 
 _CPF_RE = re.compile(r"\b\d{3}\.?\d{3}\.?\d{3}-\d{2}\b|\b\d{11}\b")
