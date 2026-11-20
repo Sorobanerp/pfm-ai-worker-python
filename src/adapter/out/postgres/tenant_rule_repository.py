@@ -1,14 +1,14 @@
 """PostgreSQL Repository connected to isolated `pfm_ai_rules` DB (port 5433) with RLS."""
 
+import os
+
 import psycopg
 from psycopg.rows import dict_row
 
 from src.domain.models import LearnedRule
 from src.domain.taxonomy import CategoryCode, CategoryGroup
 
-DEFAULT_AI_RULES_DSN = (
-    "postgresql://pfm_ai_user:pfm_ai_pass@localhost:15433/pfm_ai_rules"
-)
+DEFAULT_AI_RULES_DSN = os.getenv("PFM_AI_RULES_DSN", "")
 
 
 class PostgresTenantRuleRepository:
