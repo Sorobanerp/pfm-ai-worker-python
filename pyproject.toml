@@ -32,3 +32,6 @@ include = ["src*"]
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.coverage.run]
+omit = ["src/contracts/*"]
