@@ -77,6 +77,15 @@ class StatementRawExtractedConsumer:
 
         try:
             processed = self.handle_payload(msg.value())
+            for item in processed:
+                logger.debug(
+                    "Kafka event categorized | topic=%s tenant_id=%s category=%s confidence=%s layer=%s",
+                    self._topic,
+                    getattr(item, "tenant_id", ""),
+                    getattr(item, "category_code", ""),
+                    getattr(item, "confidence", ""),
+                    getattr(item, "classification_layer", ""),
+                )
         except Exception as exc:  # noqa: BLE001
             logger.warning("Malformed event routed to DLQ handling / skipped safely: %s", exc)
             self._consumer.commit(message=msg, asynchronous=False)
