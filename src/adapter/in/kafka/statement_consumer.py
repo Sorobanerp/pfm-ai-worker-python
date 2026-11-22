@@ -75,7 +75,12 @@ class StatementRawExtractedConsumer:
                 logger.error("Kafka consumer error: %s", msg.error())
             return []
 
-        processed = self.handle_payload(msg.value())
+        try:
+            processed = self.handle_payload(msg.value())
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Malformed event routed to DLQ handling / skipped safely: %s", exc)
+            self._consumer.commit(message=msg, asynchronous=False)
+            return []
         self._consumer.commit(message=msg, asynchronous=False)
         return processed
 

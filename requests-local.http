@@ -1,0 +1,4 @@
+@workerHealthUrl = http://localhost:18400
+
+### 1. AI Worker Liveness Healthcheck
+GET {{workerHealthUrl}}/health
