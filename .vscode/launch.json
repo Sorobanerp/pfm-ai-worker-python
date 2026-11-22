@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run PFM AI Worker Python (APP_ENV=local)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.main",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": {
+        "APP_ENV": "local",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ]
+}
