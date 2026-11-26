@@ -27,10 +27,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Semgrep SAST
+      - name: Semgrep & Bandit SAST
         run: |
-          pip install semgrep
+          pip install semgrep bandit
           semgrep scan --config auto --exclude .github --error .
+          bandit -r src -ll -ii
 
   test-and-sonar:
     name: Testes (cobertura >= 95%) + SonarCloud

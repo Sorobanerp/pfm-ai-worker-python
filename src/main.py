@@ -36,7 +36,7 @@ class DatadogStructuredJsonFormatter(logging.Formatter):
             "message": mask_sensitive_pii(record.getMessage()),
         }
         if record.exc_info:
-            log_obj["error.stack"] = self.formatException(record.exc_info)
+            log_obj["error.stack"] = mask_sensitive_pii(self.formatException(record.exc_info))
         return json.dumps(log_obj)
 
 
