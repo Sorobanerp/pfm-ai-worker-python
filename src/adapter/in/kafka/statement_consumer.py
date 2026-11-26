@@ -62,8 +62,29 @@ class StatementRawExtractedConsumer:
                 results.append(self._pipeline_service.categorize_transaction(raw_tx))
             return results
 
-        raw_tx = RawTransaction.model_validate(data)
+        raw_tx = RawTransaction.model_validate(self._normalize_event_dict(data))
         return [self._pipeline_service.categorize_transaction(raw_tx)]
+
+    @staticmethod
+    def _normalize_event_dict(data: dict[str, Any]) -> dict[str, Any]:
+        """Normalizes BFF Go StatementExtractedKafkaEvent fields to RawTransaction schema."""
+        out = dict(data)
+        if not out.get("competence_date") and out.get("transaction_date"):
+            out["competence_date"] = out["transaction_date"]
+        if not out.get("card_last4") and out.get("card_last_four"):
+            out["card_last4"] = str(out["card_last_four"])[:4]
+        if "installment_current" not in out and "installment_number" in out:
+            out["installment_current"] = max(1, int(out["installment_number"] or 1))
+        if "installment_total" not in out and "total_installments" in out:
+            out["installment_total"] = max(1, int(out["total_installments"] or 1))
+        if "amount" in out:
+            try:
+                from decimal import Decimal
+
+                out["amount"] = Decimal(str(out["amount"])).quantize(Decimal("0.0001"))
+            except Exception:  # noqa: BLE001
+                pass
+        return out
 
     def poll_once(self, timeout: float = 1.0) -> list[CategorizedTransaction]:
         """Poll a single message from Kafka, process through the 3-layer pipeline, and commit offset."""
@@ -75,7 +96,21 @@ class StatementRawExtractedConsumer:
                 logger.error("Kafka consumer error: %s", msg.error())
             return []
 
-        processed = self.handle_payload(msg.value())
+        try:
+            processed = self.handle_payload(msg.value())
+            for item in processed:
+                logger.debug(
+                    "Kafka event categorized | topic=%s tenant_id=%s category=%s confidence=%s layer=%s",
+                    self._topic,
+                    getattr(item, "tenant_id", ""),
+                    getattr(item, "category_code", ""),
+                    getattr(item, "confidence", ""),
+                    getattr(item, "classification_layer", ""),
+                )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Malformed event routed to DLQ handling / skipped safely: %s", exc)
+            self._consumer.commit(message=msg, asynchronous=False)
+            return []
         self._consumer.commit(message=msg, asynchronous=False)
         return processed
 
