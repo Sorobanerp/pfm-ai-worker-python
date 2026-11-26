@@ -14,6 +14,13 @@ class WorkerConfig:
     aws_endpoint_url: str
     worker_port: int
     app_env: str = "prod"
+    dd_service: str = "pfm-ai-worker-python"
+    dd_env: str = "prod"
+    dd_version: str = "0.1.0"
+    dd_logs_injection: bool = True
+    dd_trace_sample_rate: float = 0.10
+    otel_exporter_otlp_endpoint: str = "https://otel-collector.pfm.internal:4318"
+    cloudwatch_logs_enabled: bool = False
 
 
 def _load_dotenv_if_local(path: str = ".env.local") -> None:
@@ -44,4 +51,14 @@ def load_config() -> WorkerConfig:
         aws_endpoint_url=os.getenv("AWS_ENDPOINT_URL", "http://localhost:4566" if is_local else ""),
         worker_port=int(os.getenv("WORKER_PORT", "18400")),
         app_env=os.getenv("APP_ENV", "prod"),
+        dd_service=os.getenv("DD_SERVICE", "pfm-ai-worker-python"),
+        dd_env=os.getenv("DD_ENV", os.getenv("APP_ENV", "prod")),
+        dd_version=os.getenv("DD_VERSION", "0.1.0"),
+        dd_logs_injection=os.getenv("DD_LOGS_INJECTION", "true").strip().lower() == "true",
+        dd_trace_sample_rate=float(os.getenv("DD_TRACE_SAMPLE_RATE", "1.0" if is_local else "0.10")),
+        otel_exporter_otlp_endpoint=os.getenv(
+            "OTEL_EXPORTER_OTLP_ENDPOINT",
+            "http://localhost:4318" if is_local else "https://otel-collector.pfm.internal:4318",
+        ),
+        cloudwatch_logs_enabled=os.getenv("CLOUDWATCH_LOGS_ENABLED", "false").strip().lower() == "true",
     )
