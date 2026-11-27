@@ -32,6 +32,9 @@ from src.observability import (
     format_structured_json_log,
     init_otel_config,
     mask_sensitive_pii,
+    validate_external_url_no_ssrf,
+    validate_nfce_access_key,
+    validate_pdf_magic_bytes_in_ram,
 )
 
 _kafka_in_mod = importlib.import_module("src.adapter.in.kafka.statement_consumer")
@@ -380,8 +383,30 @@ def test_observability_and_lgpd_sanitizer(monkeypatch: pytest.MonkeyPatch) -> No
     assert "4532 1122" not in masked
     assert "abc" not in masked
 
-    log_json = format_structured_json_log("", "CPF 11122233344 password=xyz", valid_tp)
+    log_json = format_structured_json_log("", "CPF 11122233344 password=xyz token=jwt123 secret=sec1", valid_tp)
     assert "[CPF_MASKED]" in log_json
     assert "[REDACTED]" in log_json
+    assert "jwt123" not in log_json
+    assert "sec1" not in log_json
     assert "4bf92f3577b34da6a3ce929d0e0e4736" in log_json
+
+    assert validate_pdf_magic_bytes_in_ram(b"%PDF-1.7 fake content") is True
+    with pytest.raises(ValueError, match="magic bytes"):
+        validate_pdf_magic_bytes_in_ram(b"MZ-executable")
+
+    valid_key = "24261175315333000109650010000987651000987654"
+    assert validate_nfce_access_key(valid_key) == valid_key
+    with pytest.raises(ValueError, match="44 numeric digits"):
+        validate_nfce_access_key("12345-abc")
+
+    valid_sefaz = "https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=242611"
+    assert validate_external_url_no_ssrf(valid_sefaz) == valid_sefaz
+    for bad_url in [
+        "http://169.254.169.254/latest/meta-data/",
+        "https://127.0.0.1:8080/internal",
+        "https://evil.attacker.com/nfce",
+    ]:
+        with pytest.raises(ValueError, match="SSRF blocked"):
+            validate_external_url_no_ssrf(bad_url)
+
 
